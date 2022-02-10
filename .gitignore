@@ -1,3 +1,5 @@
 env/
 .vscode/
-
+*.xlsx
+venv/
+.replit
