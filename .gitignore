@@ -1,5 +1,11 @@
-env/
 .vscode/
 *.xlsx
-venv/
+/venv
+__pycache__
+*.pyc
+*.pyd
+*.pyo
+.vscode
+.idea
+.env
 .replit
