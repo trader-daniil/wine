@@ -1,5 +1,6 @@
 .vscode/
 *.xlsx
+!wines_example.xlsx
 /venv
 __pycache__
 *.pyc

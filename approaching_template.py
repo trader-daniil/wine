@@ -1,13 +1,10 @@
-from datetime import datetime
+import argparse
 from collections import defaultdict
+from datetime import datetime
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 
 import pandas
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-import dateutil
-
-WINES_FILEPATH = 'vines_data/wine3.xlsx'
-
 
 YEARS = {
     '1': 'год',
@@ -21,6 +18,7 @@ YEARS = {
     '9': 'лет',
     '0': 'лет',
 }
+
 
 def get_company_age(founded_at):
     current_year = datetime.now().year
@@ -41,6 +39,15 @@ def parse_vines_from_excel(filepath):
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        description='Программа возвращает страницу с винами',
+    )
+    parser.add_argument(
+        'filename',
+        help='Название файла с винами',
+    )
+    args = parser.parse_args()
+    wines_filepath = f'wines_data/{args.filename}'
     env = Environment(
         loader=FileSystemLoader('.'),
         autoescape=select_autoescape(['html', 'xml']),
@@ -50,7 +57,7 @@ def main():
     company_age = get_company_age(
         founded_at=wines_company_founded_at
     )
-    vines_categories = parse_vines_from_excel(filepath=WINES_FILEPATH)
+    vines_categories = parse_vines_from_excel(filepath=wines_filepath)
     rendered_page = template.render(
         age=company_age,
         categories=vines_categories,
