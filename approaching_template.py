@@ -6,7 +6,7 @@ from http.server import HTTPServer, SimpleHTTPRequestHandler
 import pandas
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-YEARS = {
+YEARS_CAPTIONS = {
     '1': 'год',
     '2': 'года',
     '3': 'года',
@@ -20,17 +20,18 @@ YEARS = {
 }
 
 
-def get_company_age(founded_at):
+def get_company_age(foundation_year):
     current_year = datetime.now().year
-    company_age = current_year - founded_at
+    company_age = current_year - foundation_year
     last_number_of_age = str(company_age)[-1]
-    return f'{company_age} {YEARS[last_number_of_age]}'
+    return f'{company_age} {YEARS_CAPTIONS[last_number_of_age]}'
 
 
-def parse_vines_from_excel(filepath):
-    excel_wines = pandas.read_excel(filepath)
-    excel_wines.fillna('', inplace=True)
-    wines = excel_wines.to_dict(orient='records')
+def parse_wines_from_excel(filepath):
+    wines = pandas.read_excel(
+        filepath,
+        keep_default_na=False,
+    ).to_dict(orient='records')
     grouped_wines = defaultdict(list)
     for wine in wines:
         category = wine['Категория']
@@ -43,27 +44,31 @@ def main():
         description='Программа возвращает страницу с винами',
     )
     parser.add_argument(
-        'filename',
+        '--filepath',
         help='Название файла с винами',
+        default='wines_data/wines_example.xlsx',
     )
     args = parser.parse_args()
-    wines_filepath = f'wines_data/{args.filename}'
+
     env = Environment(
         loader=FileSystemLoader('.'),
         autoescape=select_autoescape(['html', 'xml']),
     )
     template = env.get_template('template.html')
-    wines_company_founded_at = 1920
+
+    company_foundation_year = 1920
     company_age = get_company_age(
-        founded_at=wines_company_founded_at
+        foundation_year=company_foundation_year
     )
-    vines_categories = parse_vines_from_excel(filepath=wines_filepath)
+
+    wines_categories = parse_wines_from_excel(filepath=args.filepath)
     rendered_page = template.render(
         age=company_age,
-        categories=vines_categories,
+        categories=wines_categories,
     )
     with open('index.html', 'w', encoding="utf8") as file:
         file.write(rendered_page)
+
     server = HTTPServer(('0.0.0.0', 8000), SimpleHTTPRequestHandler)
     server.serve_forever()
 
